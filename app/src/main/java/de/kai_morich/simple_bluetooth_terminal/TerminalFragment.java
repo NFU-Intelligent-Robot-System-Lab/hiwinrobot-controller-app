@@ -122,7 +122,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_terminal, container, false);
+//        View view = inflater.inflate(R.layout.fragment_terminal, container, false);
+        View view = inflater.inflate(R.layout.hiwin_arm_control, container, false);
         receiveText = view.findViewById(R.id.receive_text);                          // TextView performance decreases with number of spans
         receiveText.setTextColor(getResources().getColor(R.color.colorRecieveText)); // set as default color to reduce number of spans
         receiveText.setMovementMethod(ScrollingMovementMethod.getInstance());
