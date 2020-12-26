@@ -15,6 +15,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
+import android.view.ActionProvider;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,7 +32,7 @@ import androidx.fragment.app.Fragment;
 
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
 
-    private enum Connected { False, Pending, True }
+    private enum Connected {False, Pending, True}
 
     private String deviceAddress;
     private SerialService service;
@@ -83,7 +84,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     @Override
     public void onStart() {
         super.onStart();
-        if(service != null)
+        if (service != null)
             service.attach(this);
         else
             getActivity().startService(new Intent(getActivity(), SerialService.class)); // prevents service destroy on unbind from recreated activity caused by orientation change
@@ -91,12 +92,13 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     @Override
     public void onStop() {
-        if(service != null && !getActivity().isChangingConfigurations())
+        if (service != null && !getActivity().isChangingConfigurations())
             service.detach();
         super.onStop();
     }
 
-    @SuppressWarnings("deprecation") // onAttach(context) was added with API 23. onAttach(activity) works for all API versions
+    @SuppressWarnings("deprecation")
+    // onAttach(context) was added with API 23. onAttach(activity) works for all API versions
     @Override
     public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
@@ -105,14 +107,17 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     @Override
     public void onDetach() {
-        try { getActivity().unbindService(this); } catch(Exception ignored) {}
+        try {
+            getActivity().unbindService(this);
+        } catch (Exception ignored) {
+        }
         super.onDetach();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if(initialStart && service != null) {
+        if (initialStart && service != null) {
             initialStart = false;
             getActivity().runOnUiThread(this::connect);
         }
@@ -122,7 +127,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     public void onServiceConnected(ComponentName name, IBinder binder) {
         service = ((SerialService.SerialBinder) binder).getService();
         service.attach(this);
-        if(initialStart && isResumed()) {
+        if (initialStart && isResumed()) {
             initialStart = false;
             getActivity().runOnUiThread(this::connect);
         }
@@ -235,14 +240,14 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void send(String str) {
-        if(connected != Connected.True) {
+        if (connected != Connected.True) {
             Toast.makeText(getActivity(), "not connected", Toast.LENGTH_SHORT).show();
             return;
         }
         try {
             String msg;
             byte[] data;
-            if(hexEnabled) {
+            if (hexEnabled) {
                 StringBuilder sb = new StringBuilder();
                 TextUtil.toHexString(sb, TextUtil.fromHexString(str));
                 TextUtil.toHexString(sb, newline.getBytes());
@@ -259,28 +264,28 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void receive(byte[] data) {
-        if(hexEnabled) {
+        if (hexEnabled) {
 //            receiveText.append(TextUtil.toHexString(data) + '\n');
         } else {
-            ValueX.setText(TextUtil.toHexString(data));
-//            String msg = new String(data);
-//            if(newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
-//                // don't show CR as ^M if directly before LF
-//                msg = msg.replace(TextUtil.newline_crlf, TextUtil.newline_lf);
-//                // special handling if CR and LF come in separate fragments
-//                if (pendingNewline && msg.charAt(0) == '\n') {
-//                    Editable edt = receiveText.getEditableText();
-//                    if (edt != null && edt.length() > 1)
-//                        edt.replace(edt.length() - 2, edt.length(), "");
-//                }
-//                pendingNewline = msg.charAt(msg.length() - 1) == '\r';
-//            }
-//            receiveText.append(TextUtil.toCaretString(msg, newline.length() != 0));
+            if (data[0] == 0x01) {
+                int x = (((data[1] & 0xff) << 8) | (data[2] & 0xff));
+                ValueX.setText(Integer.toString(x));
+                int y = (((data[3] & 0xff) << 8) | (data[4] & 0xff));
+                ValueY.setText(Integer.toString(y));
+                int z = (((data[5] & 0xff) << 8) | (data[6] & 0xff));
+                ValueZ.setText(Integer.toString(z));
+                int a = (((data[7] & 0xff) << 8) | (data[8] & 0xff));
+                ValueA.setText(Integer.toString(a));
+                int b = (((data[9] & 0xff) << 8) | (data[10] & 0xff));
+                ValueB.setText(Integer.toString(b));
+                int c = (((data[11] & 0xff) << 8) | (data[12] & 0xff));
+                ValueC.setText(Integer.toString(c));
+            }
         }
     }
 
     private void status(String str) {
-        SpannableStringBuilder spn = new SpannableStringBuilder(str+'\n');
+        SpannableStringBuilder spn = new SpannableStringBuilder(str + '\n');
         spn.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorStatusText)), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 //        receiveText.append(spn);
     }
