@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +45,21 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private boolean hexEnabled = false;
     private boolean pendingNewline = false;
     private String newline = TextUtil.newline_crlf;
+
+    private Button XA;
+    private Button XS;
+    private Button YA;
+    private Button YS;
+    private Button ZA;
+    private Button ZS;
+
+    private TextView ValueX;
+    private TextView ValueY;
+    private TextView ValueZ;
+    private TextView ValueA;
+    private TextView ValueB;
+    private TextView ValueC;
+
 
     /*
      * Lifecycle
@@ -124,18 +140,33 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 //        View view = inflater.inflate(R.layout.fragment_terminal, container, false);
         View view = inflater.inflate(R.layout.hiwin_arm_control, container, false);
-        receiveText = view.findViewById(R.id.receive_text);                          // TextView performance decreases with number of spans
-        receiveText.setTextColor(getResources().getColor(R.color.colorRecieveText)); // set as default color to reduce number of spans
-        receiveText.setMovementMethod(ScrollingMovementMethod.getInstance());
+//        receiveText = view.findViewById(R.id.receive_text);                          // TextView performance decreases with number of spans
+//        receiveText.setTextColor(getResources().getColor(R.color.colorRecieveText)); // set as default color to reduce number of spans
+//        receiveText.setMovementMethod(ScrollingMovementMethod.getInstance());
 
-        sendText = view.findViewById(R.id.send_text);
-        hexWatcher = new TextUtil.HexWatcher(sendText);
-        hexWatcher.enable(hexEnabled);
-        sendText.addTextChangedListener(hexWatcher);
-        sendText.setHint(hexEnabled ? "HEX mode" : "");
+//        sendText = view.findViewById(R.id.send_text);
+//        hexWatcher = new TextUtil.HexWatcher(sendText);
+//        hexWatcher.enable(hexEnabled);
+//        sendText.addTextChangedListener(hexWatcher);
+//        sendText.setHint(hexEnabled ? "HEX mode" : "");
 
-        View sendBtn = view.findViewById(R.id.send_btn);
-        sendBtn.setOnClickListener(v -> send(sendText.getText().toString()));
+        XA = (Button) view.findViewById(R.id.buttonXA);
+        XS = (Button) view.findViewById(R.id.buttonXS);
+        YA = (Button) view.findViewById(R.id.buttonYA);
+        YS = (Button) view.findViewById(R.id.buttonYS);
+        ZA = (Button) view.findViewById(R.id.buttonZA);
+        ZS = (Button) view.findViewById(R.id.buttonZS);
+
+        ValueX = (TextView) view.findViewById(R.id.textViewNowPosition0);
+        ValueY = (TextView) view.findViewById(R.id.textViewNowPosition1);
+        ValueZ = (TextView) view.findViewById(R.id.textViewNowPosition2);
+        ValueA = (TextView) view.findViewById(R.id.textViewNowPosition3);
+        ValueB = (TextView) view.findViewById(R.id.textViewNowPosition4);
+        ValueC = (TextView) view.findViewById(R.id.textViewNowPosition5);
+
+
+//        View sendBtn = view.findViewById(R.id.send_btn);
+//        sendBtn.setOnClickListener(v -> send(sendText.getText().toString()));
         return view;
     }
 
@@ -225,28 +256,29 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     private void receive(byte[] data) {
         if(hexEnabled) {
-            receiveText.append(TextUtil.toHexString(data) + '\n');
+//            receiveText.append(TextUtil.toHexString(data) + '\n');
+            ValueX.setText(TextUtil.toHexString(data));
         } else {
-            String msg = new String(data);
-            if(newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
-                // don't show CR as ^M if directly before LF
-                msg = msg.replace(TextUtil.newline_crlf, TextUtil.newline_lf);
-                // special handling if CR and LF come in separate fragments
-                if (pendingNewline && msg.charAt(0) == '\n') {
-                    Editable edt = receiveText.getEditableText();
-                    if (edt != null && edt.length() > 1)
-                        edt.replace(edt.length() - 2, edt.length(), "");
-                }
-                pendingNewline = msg.charAt(msg.length() - 1) == '\r';
-            }
-            receiveText.append(TextUtil.toCaretString(msg, newline.length() != 0));
+//            String msg = new String(data);
+//            if(newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
+//                // don't show CR as ^M if directly before LF
+//                msg = msg.replace(TextUtil.newline_crlf, TextUtil.newline_lf);
+//                // special handling if CR and LF come in separate fragments
+//                if (pendingNewline && msg.charAt(0) == '\n') {
+//                    Editable edt = receiveText.getEditableText();
+//                    if (edt != null && edt.length() > 1)
+//                        edt.replace(edt.length() - 2, edt.length(), "");
+//                }
+//                pendingNewline = msg.charAt(msg.length() - 1) == '\r';
+//            }
+//            receiveText.append(TextUtil.toCaretString(msg, newline.length() != 0));
         }
     }
 
     private void status(String str) {
         SpannableStringBuilder spn = new SpannableStringBuilder(str+'\n');
         spn.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorStatusText)), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        receiveText.append(spn);
+//        receiveText.append(spn);
     }
 
     /*
