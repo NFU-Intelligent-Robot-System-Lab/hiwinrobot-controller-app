@@ -180,7 +180,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.clear) {
-            receiveText.setText("");
+//            receiveText.setText("");
             return true;
         } else if (id == R.id.newline) {
             String[] newlineNames = getResources().getStringArray(R.array.newline_names);
@@ -196,9 +196,9 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             return true;
         } else if (id == R.id.hex) {
             hexEnabled = !hexEnabled;
-            sendText.setText("");
+//            sendText.setText("");
             hexWatcher.enable(hexEnabled);
-            sendText.setHint(hexEnabled ? "HEX mode" : "");
+//            sendText.setHint(hexEnabled ? "HEX mode" : "");
             item.setChecked(hexEnabled);
             return true;
         } else {
@@ -257,8 +257,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private void receive(byte[] data) {
         if(hexEnabled) {
 //            receiveText.append(TextUtil.toHexString(data) + '\n');
-            ValueX.setText(TextUtil.toHexString(data));
         } else {
+            ValueX.setText(TextUtil.toHexString(data));
 //            String msg = new String(data);
 //            if(newline.equals(TextUtil.newline_crlf) && msg.length() > 0) {
 //                // don't show CR as ^M if directly before LF
