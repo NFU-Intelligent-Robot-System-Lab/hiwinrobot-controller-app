@@ -165,6 +165,13 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         ValueC = (TextView) view.findViewById(R.id.textViewNowPosition5);
 
 
+        XA.setOnClickListener(v -> send("X"));
+        XS.setOnClickListener(v -> send("x"));
+        YA.setOnClickListener(v -> send("Y"));
+        YS.setOnClickListener(v -> send("y"));
+        ZA.setOnClickListener(v -> send("Z"));
+        ZS.setOnClickListener(v -> send("z"));
+
 //        View sendBtn = view.findViewById(R.id.send_btn);
 //        sendBtn.setOnClickListener(v -> send(sendText.getText().toString()));
         return view;
@@ -245,9 +252,6 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                 msg = str;
                 data = (str + newline).getBytes();
             }
-            SpannableStringBuilder spn = new SpannableStringBuilder(msg+'\n');
-            spn.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorSendText)), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            receiveText.append(spn);
             service.write(data);
         } catch (Exception e) {
             onSerialIoError(e);
