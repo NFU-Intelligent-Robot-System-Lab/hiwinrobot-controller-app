@@ -269,34 +269,33 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
             try {
                 stateMessage.setText(Integer.toString(data.length) +" ; " +TextUtil.toHexString(data));
 
-                int offset = 0;
                 switch (data.length)
                 {
                     case 15:
                     case 14:
                     case 13:
-                        int c = (((data[data.length - 13] & 0xff) << 8) | (data[data.length - 12]&0xff));
-                        ValueC.setText(Integer.toString(c));
+                        ValueC.setText(decoder(data[data.length - 13],
+                                               data[data.length - 12]));
                     case 12:
                     case 11:
-                        int b = (((data[data.length - 11] & 0xff) << 8) | (data[data.length - 10]&0xff));
-                        ValueB.setText(Integer.toString(b));
+                        ValueB.setText(decoder(data[data.length - 11],
+                                data[data.length -10]));
                     case 10:
                     case 9:
-                        int a = (((data[data.length - 9] & 0xff) << 8) | (data[data.length - 8]&0xff));
-                        ValueA.setText(Integer.toString(a));
+                        ValueA.setText(decoder(data[data.length - 9],
+                                data[data.length - 8]));
                     case 8:
                     case 7:
-                        int z = (((data[data.length - 7] & 0xff) << 8) | (data[data.length - 6]&0xff));
-                        ValueZ.setText(Integer.toString(z));
+                        ValueZ.setText(decoder(data[data.length - 7],
+                                data[data.length -6]));
                     case 6:
                     case 5:
-                        int y = (((data[data.length - 5] & 0xff) << 8) | (data[data.length - 4]&0xff));
-                        ValueY.setText(Integer.toString(y));
+                        ValueY.setText(decoder(data[data.length - 5],
+                                data[data.length -4]));
                     case 4:
                     case 3:
-                        int x = (((data[data.length - 3] & 0xff) << 8) | (data[data.length - 2]&0xff));
-                        ValueX.setText(Integer.toString(x));
+                        ValueX.setText(decoder(data[data.length - 3],
+                                data[data.length -2]));
                     default:
                         break;
                 }
@@ -305,6 +304,24 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 //               stateMessage.setText(e.getMessage());
             }
         }
+    }
+
+    private  String decoder(byte highByte, byte lowByte)
+    {
+        int value;
+
+        // Negative number.
+        if ((highByte & 0x80) == 0x80)
+        {
+            value = (highByte << 8) | lowByte;
+        }
+        // Positive number
+        else
+        {
+            value = ((highByte & 0xff) << 8) | (lowByte & 0xff);
+        }
+
+        return Integer.toString(value);
     }
 
     private void status(String str) {
