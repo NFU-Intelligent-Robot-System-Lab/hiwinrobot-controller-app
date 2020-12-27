@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +35,6 @@ import androidx.fragment.app.Fragment;
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
 
     private enum Connected {False, Pending, True}
-    private enum SendDataType {RelativeXY, RelativeZ, Others}
 
     private String deviceAddress;
     private SerialService service;
@@ -57,8 +57,8 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private Button ZS;
     private Button Update;
 
-    private NumberPicker xyRelativeValue;
-    private NumberPicker zRelativeValue;
+    private EditText xyRelativeValue;
+    private EditText zRelativeValue;
 
     private TextView ValueX;
     private TextView ValueY;
@@ -177,23 +177,19 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         ZS = (Button) view.findViewById(R.id.buttonZS);
         Update = (Button) view.findViewById(R.id.buttonUpdate);
 
-        XA.setOnClickListener(v -> send("X", SendDataType.RelativeXY));
-        XS.setOnClickListener(v -> send("x", SendDataType.RelativeXY));
-        YA.setOnClickListener(v -> send("Y", SendDataType.RelativeXY));
-        YS.setOnClickListener(v -> send("y", SendDataType.RelativeXY));
-        ZA.setOnClickListener(v -> send("Z", SendDataType.RelativeZ));
-        ZS.setOnClickListener(v -> send("z", SendDataType.RelativeZ));
-        Update.setOnClickListener(v -> send("u", SendDataType.Others));
+        XA.setOnClickListener(v -> send("xr+" + xyRelativeValue.getText()));
+        XS.setOnClickListener(v -> send("xr-" + xyRelativeValue.getText()));
+        YA.setOnClickListener(v -> send("yr+" + xyRelativeValue.getText()));
+        YS.setOnClickListener(v -> send("yr-" + xyRelativeValue.getText()));
+        ZA.setOnClickListener(v -> send("zr+" + zRelativeValue.getText()));
+        ZS.setOnClickListener(v -> send("zr-" + zRelativeValue.getText()));
+        Update.setOnClickListener(v -> send("u"));
 
-        xyRelativeValue = (NumberPicker) view.findViewById(R.id.xyRelativeValue);
-        xyRelativeValue.setMinValue(0);
-        xyRelativeValue.setMaxValue(100);
-        xyRelativeValue.setValue(25);
+        xyRelativeValue = (EditText) view.findViewById(R.id.xyRelativeValue);
+        xyRelativeValue.setText("25");
 
-        zRelativeValue = (NumberPicker) view.findViewById(R.id.zRelativeValue);
-        zRelativeValue.setMinValue(0);
-        zRelativeValue.setMaxValue(100);
-        zRelativeValue.setValue(25);
+        zRelativeValue = (EditText) view.findViewById(R.id.zRelativeValue);
+        zRelativeValue.setText("25");
 
 //        View sendBtn = view.findViewById(R.id.send_btn);
 //        sendBtn.setOnClickListener(v -> send(sendText.getText().toString()));
@@ -257,22 +253,14 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         service.disconnect();
     }
 
-    private void send(String str, SendDataType dataType) {
+    private void send(String str) {
         if (connected != Connected.True) {
             Toast.makeText(getActivity(), "not connected", Toast.LENGTH_SHORT).show();
             return;
         }
         try {
             byte[] data;
-
-            if (dataType == SendDataType.RelativeXY){
-                data = (str + Integer.toString(xyRelativeValue.getValue()) + newline).getBytes();
-            } else if ( dataType == SendDataType.RelativeZ) {
-                data = (str + Integer.toString(zRelativeValue.getValue()) + newline).getBytes();
-            } else {
-                data = (str + newline).getBytes();
-            }
-
+            data = (str + newline).getBytes();
             service.write(data);
         } catch (Exception e) {
             onSerialIoError(e);
