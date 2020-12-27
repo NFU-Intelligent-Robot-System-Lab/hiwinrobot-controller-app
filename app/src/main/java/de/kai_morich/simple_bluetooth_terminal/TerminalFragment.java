@@ -183,7 +183,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         YS.setOnClickListener(v -> send("yr-" + xyRelativeValue.getText()));
         ZA.setOnClickListener(v -> send("zr+" + zRelativeValue.getText()));
         ZS.setOnClickListener(v -> send("zr-" + zRelativeValue.getText()));
-        Update.setOnClickListener(v -> send("u"));
+        Update.setOnClickListener(v -> send("ud"));
 
         xyRelativeValue = (EditText) view.findViewById(R.id.xyRelativeValue);
         xyRelativeValue.setText("25");
