@@ -32,7 +32,7 @@ import androidx.fragment.app.Fragment;
 
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
 
-    private enum Connected { False, Pending, True }
+    private enum Connected {False, Pending, True}
 
     private String deviceAddress;
     private SerialService service;
@@ -85,7 +85,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     @Override
     public void onStart() {
         super.onStart();
-        if(service != null)
+        if (service != null)
             service.attach(this);
         else
             getActivity().startService(new Intent(getActivity(), SerialService.class)); // prevents service destroy on unbind from recreated activity caused by orientation change
@@ -93,12 +93,13 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     @Override
     public void onStop() {
-        if(service != null && !getActivity().isChangingConfigurations())
+        if (service != null && !getActivity().isChangingConfigurations())
             service.detach();
         super.onStop();
     }
 
-    @SuppressWarnings("deprecation") // onAttach(context) was added with API 23. onAttach(activity) works for all API versions
+    @SuppressWarnings("deprecation")
+    // onAttach(context) was added with API 23. onAttach(activity) works for all API versions
     @Override
     public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
@@ -107,14 +108,17 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
     @Override
     public void onDetach() {
-        try { getActivity().unbindService(this); } catch(Exception ignored) {}
+        try {
+            getActivity().unbindService(this);
+        } catch (Exception ignored) {
+        }
         super.onDetach();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if(initialStart && service != null) {
+        if (initialStart && service != null) {
             initialStart = false;
             getActivity().runOnUiThread(this::connect);
         }
@@ -124,7 +128,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     public void onServiceConnected(ComponentName name, IBinder binder) {
         service = ((SerialService.SerialBinder) binder).getService();
         service.attach(this);
-        if(initialStart && isResumed()) {
+        if (initialStart && isResumed()) {
             initialStart = false;
             getActivity().runOnUiThread(this::connect);
         }
@@ -239,14 +243,14 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void send(String str) {
-        if(connected != Connected.True) {
+        if (connected != Connected.True) {
             Toast.makeText(getActivity(), "not connected", Toast.LENGTH_SHORT).show();
             return;
         }
         try {
             String msg;
             byte[] data;
-            if(hexEnabled) {
+            if (hexEnabled) {
                 StringBuilder sb = new StringBuilder();
                 TextUtil.toHexString(sb, TextUtil.fromHexString(str));
                 TextUtil.toHexString(sb, newline.getBytes());
@@ -263,23 +267,22 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     }
 
     private void receive(byte[] data) {
-        if(hexEnabled) {
+        if (hexEnabled) {
 //            receiveText.append(TextUtil.toHexString(data) + '\n');
         } else {
             try {
-                stateMessage.setText(Integer.toString(data.length) +" ; " +TextUtil.toHexString(data));
+                stateMessage.setText(Integer.toString(data.length) + " ; " + TextUtil.toHexString(data));
 
-                switch (data.length)
-                {
+                switch (data.length) {
                     case 15:
                     case 14:
                     case 13:
                         ValueC.setText(decoder(data[data.length - 13],
-                                               data[data.length - 12]));
+                                data[data.length - 12]));
                     case 12:
                     case 11:
                         ValueB.setText(decoder(data[data.length - 11],
-                                data[data.length -10]));
+                                data[data.length - 10]));
                     case 10:
                     case 9:
                         ValueA.setText(decoder(data[data.length - 9],
@@ -287,37 +290,33 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                     case 8:
                     case 7:
                         ValueZ.setText(decoder(data[data.length - 7],
-                                data[data.length -6]));
+                                data[data.length - 6]));
                     case 6:
                     case 5:
                         ValueY.setText(decoder(data[data.length - 5],
-                                data[data.length -4]));
+                                data[data.length - 4]));
                     case 4:
                     case 3:
                         ValueX.setText(decoder(data[data.length - 3],
-                                data[data.length -2]));
+                                data[data.length - 2]));
                     default:
                         break;
                 }
-            }
-            catch (Exception e){
+            } catch (Exception e) {
 //               stateMessage.setText(e.getMessage());
             }
         }
     }
 
-    private  String decoder(byte highByte, byte lowByte)
-    {
+    private String decoder(byte highByte, byte lowByte) {
         int value;
 
-        // Negative number.
-        if ((highByte & 0x80) == 0x80)
-        {
+        // Negative number
+        if ((highByte & 0x80) == 0x80) {
             value = (highByte << 8) | lowByte;
         }
         // Positive number
-        else
-        {
+        else {
             value = ((highByte & 0xff) << 8) | (lowByte & 0xff);
         }
 
