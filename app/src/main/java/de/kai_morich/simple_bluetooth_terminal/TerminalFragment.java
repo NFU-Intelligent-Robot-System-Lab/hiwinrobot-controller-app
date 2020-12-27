@@ -53,6 +53,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private Button YS;
     private Button ZA;
     private Button ZS;
+    private Button Update;
 
     private TextView ValueX;
     private TextView ValueY;
@@ -60,7 +61,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private TextView ValueA;
     private TextView ValueB;
     private TextView ValueC;
-
+    private TextView stateMessage;
 
     /*
      * Lifecycle
@@ -151,20 +152,21 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 //        sendText.addTextChangedListener(hexWatcher);
 //        sendText.setHint(hexEnabled ? "HEX mode" : "");
 
-        XA = (Button) view.findViewById(R.id.buttonXA);
-        XS = (Button) view.findViewById(R.id.buttonXS);
-        YA = (Button) view.findViewById(R.id.buttonYA);
-        YS = (Button) view.findViewById(R.id.buttonYS);
-        ZA = (Button) view.findViewById(R.id.buttonZA);
-        ZS = (Button) view.findViewById(R.id.buttonZS);
-
         ValueX = (TextView) view.findViewById(R.id.textViewNowPosition0);
         ValueY = (TextView) view.findViewById(R.id.textViewNowPosition1);
         ValueZ = (TextView) view.findViewById(R.id.textViewNowPosition2);
         ValueA = (TextView) view.findViewById(R.id.textViewNowPosition3);
         ValueB = (TextView) view.findViewById(R.id.textViewNowPosition4);
         ValueC = (TextView) view.findViewById(R.id.textViewNowPosition5);
+        stateMessage = (TextView) view.findViewById(R.id.state);
 
+        XA = (Button) view.findViewById(R.id.buttonXA);
+        XS = (Button) view.findViewById(R.id.buttonXS);
+        YA = (Button) view.findViewById(R.id.buttonYA);
+        YS = (Button) view.findViewById(R.id.buttonYS);
+        ZA = (Button) view.findViewById(R.id.buttonZA);
+        ZS = (Button) view.findViewById(R.id.buttonZS);
+        Update = (Button) view.findViewById(R.id.buttonUpdate);
 
         XA.setOnClickListener(v -> send("X"));
         XS.setOnClickListener(v -> send("x"));
@@ -172,6 +174,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         YS.setOnClickListener(v -> send("y"));
         ZA.setOnClickListener(v -> send("Z"));
         ZS.setOnClickListener(v -> send("z"));
+        Update.setOnClickListener(v -> send("u"));
 
 //        View sendBtn = view.findViewById(R.id.send_btn);
 //        sendBtn.setOnClickListener(v -> send(sendText.getText().toString()));
@@ -263,28 +266,52 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         if(hexEnabled) {
 //            receiveText.append(TextUtil.toHexString(data) + '\n');
         } else {
-                if(data[0] == 0x01)
+            try {
+                stateMessage.setText(Integer.toString(data.length) +" ; " +TextUtil.toHexString(data));
+
+                int offset = 0;
+                switch (data.length)
                 {
-                    int x = (((data[1] & 0xff) << 8) | (data[2]&0xff));
-                    ValueX.setText(Integer.toString(x));
-                    int y = (((data[3] & 0xff) << 8) | (data[4]&0xff));
-                    ValueY.setText(Integer.toString(y));
-                    int z = (((data[5] & 0xff) << 8) | (data[6]&0xff));
-                    ValueZ.setText(Integer.toString(z));
-                    int a = (((data[7] & 0xff) << 8) | (data[8]&0xff));
-                    ValueA.setText(Integer.toString(a));
-                    int b = (((data[9] & 0xff) << 8) | (data[10]&0xff));
-                    ValueB.setText(Integer.toString(b));
-                    int c = (((data[11] & 0xff) << 8) | (data[12]&0xff));
-                    ValueC.setText(Integer.toString(c));
+                    case 15:
+                    case 14:
+                    case 13:
+                        int c = (((data[data.length - 13] & 0xff) << 8) | (data[data.length - 12]&0xff));
+                        ValueC.setText(Integer.toString(c));
+                    case 12:
+                    case 11:
+                        int b = (((data[data.length - 11] & 0xff) << 8) | (data[data.length - 10]&0xff));
+                        ValueB.setText(Integer.toString(b));
+                    case 10:
+                    case 9:
+                        int a = (((data[data.length - 9] & 0xff) << 8) | (data[data.length - 8]&0xff));
+                        ValueA.setText(Integer.toString(a));
+                    case 8:
+                    case 7:
+                        int z = (((data[data.length - 7] & 0xff) << 8) | (data[data.length - 6]&0xff));
+                        ValueZ.setText(Integer.toString(z));
+                    case 6:
+                    case 5:
+                        int y = (((data[data.length - 5] & 0xff) << 8) | (data[data.length - 4]&0xff));
+                        ValueY.setText(Integer.toString(y));
+                    case 4:
+                    case 3:
+                        int x = (((data[data.length - 3] & 0xff) << 8) | (data[data.length - 2]&0xff));
+                        ValueX.setText(Integer.toString(x));
+                    default:
+                        break;
                 }
+            }
+            catch (Exception e){
+//               stateMessage.setText(e.getMessage());
+            }
         }
     }
 
     private void status(String str) {
-        SpannableStringBuilder spn = new SpannableStringBuilder(str+'\n');
-        spn.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorStatusText)), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//        SpannableStringBuilder spn = new SpannableStringBuilder(str+'\n');
+//        spn.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorStatusText)), 0, spn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 //        receiveText.append(spn);
+//        stateMessage.setText(spn);
     }
 
     /*
