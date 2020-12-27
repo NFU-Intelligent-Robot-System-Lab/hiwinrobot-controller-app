@@ -16,6 +16,7 @@ import android.text.SpannableStringBuilder;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.view.ActionProvider;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,6 +32,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import org.w3c.dom.Text;
 
 public class TerminalFragment extends Fragment implements ServiceConnection, SerialListener {
 
@@ -187,9 +190,47 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
 
         xyRelativeValue = (EditText) view.findViewById(R.id.xyRelativeValue);
         xyRelativeValue.setText("25");
+        xyRelativeValue.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                int value;
+
+                try {
+                    value= Integer.valueOf(xyRelativeValue.getText().toString());
+                } catch (Exception ex) {
+                    return false;
+                }
+
+                if (value > 100){
+                    xyRelativeValue.setText("100");
+                } else if (value < 0){
+                    xyRelativeValue.setText("0");
+                }
+                return false;
+            }
+        });
 
         zRelativeValue = (EditText) view.findViewById(R.id.zRelativeValue);
         zRelativeValue.setText("25");
+        zRelativeValue.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                int value;
+
+                try {
+                    value= Integer.valueOf(zRelativeValue.getText().toString());
+                } catch (Exception ex) {
+                    return false;
+                }
+
+                if (value > 50){
+                    zRelativeValue.setText("50");
+                } else if (value < 0){
+                    zRelativeValue.setText("0");
+                }
+                return false;
+            }
+        });
 
 //        View sendBtn = view.findViewById(R.id.send_btn);
 //        sendBtn.setOnClickListener(v -> send(sendText.getText().toString()));
