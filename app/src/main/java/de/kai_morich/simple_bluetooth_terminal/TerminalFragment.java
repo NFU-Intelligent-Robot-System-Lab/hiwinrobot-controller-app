@@ -59,9 +59,11 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
     private Button ZA;
     private Button ZS;
     private Button Update;
+    private Button GripperStart;
 
     private EditText xyRelativeValue;
     private EditText zRelativeValue;
+    private EditText gripperVlaue;
 
     private TextView ValueX;
     private TextView ValueY;
@@ -179,6 +181,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         ZA = (Button) view.findViewById(R.id.buttonZA);
         ZS = (Button) view.findViewById(R.id.buttonZS);
         Update = (Button) view.findViewById(R.id.buttonUpdate);
+        GripperStart = (Button) view.findViewById(R.id.buttonGripperStart);
 
         XA.setOnClickListener(v -> send("xr+" + xyRelativeValue.getText()));
         XS.setOnClickListener(v -> send("xr-" + xyRelativeValue.getText()));
@@ -187,6 +190,7 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
         ZA.setOnClickListener(v -> send("zr+" + zRelativeValue.getText()));
         ZS.setOnClickListener(v -> send("zr-" + zRelativeValue.getText()));
         Update.setOnClickListener(v -> send("ud"));
+        GripperStart.setOnClickListener(v -> send("gm" + gripperVlaue.getText()));
 
         xyRelativeValue = (EditText) view.findViewById(R.id.xyRelativeValue);
         xyRelativeValue.setText("25");
@@ -227,6 +231,28 @@ public class TerminalFragment extends Fragment implements ServiceConnection, Ser
                     zRelativeValue.setText("50");
                 } else if (value < 0){
                     zRelativeValue.setText("0");
+                }
+                return false;
+            }
+        });
+
+        gripperVlaue = (EditText) view.findViewById(R.id.gripperValue);
+        gripperVlaue.setText("15");
+        gripperVlaue.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                int value;
+
+                try {
+                    value= Integer.valueOf(gripperVlaue.getText().toString());
+                } catch (Exception ex) {
+                    return false;
+                }
+
+                if (value > 32){
+                    gripperVlaue.setText("32");
+                } else if (value < 0){
+                    gripperVlaue.setText("0");
                 }
                 return false;
             }
